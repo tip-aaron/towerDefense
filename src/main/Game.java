@@ -13,10 +13,6 @@ public class Game extends JFrame implements Runnable {
     private double FPS_SET = 120.0;
     private double UPS_SET = 60.0;
 
-    // Listeners
-    private TowerDefenseMouseListener mouseListener;
-    private KeyboardListener keyboardListener;
-
     // Classes
     private Thread gameThread;
     private GameScreen gameScreen;
@@ -33,6 +29,7 @@ public class Game extends JFrame implements Runnable {
 
         this.pack();
         this.setLocationRelativeTo(null);
+        this.setResizable(false);
         this.setVisible(true);
     }
 
@@ -50,6 +47,10 @@ public class Game extends JFrame implements Runnable {
 
     public PlayingScene getPlayingScene() {
         return playingScene;
+    }
+
+    public MenuScene getMenu() {
+        return this.menuScene;
     }
 
     @Override
@@ -73,7 +74,7 @@ public class Game extends JFrame implements Runnable {
 
             // Render
             if (nowInNanoTime - lastFrame >= timePerFrame) {
-                gameScreen.repaint();
+                SwingUtilities.invokeLater(() -> this.gameScreen.repaint());
 
                 lastFrame = nowInNanoTime;
                 frames += 1;
@@ -88,7 +89,7 @@ public class Game extends JFrame implements Runnable {
             }
 
             if (nowInMilliTime - lastTimeCheckInMs >= 1000) {
-                System.out.println("FPS: " + frames +" | UPS: " + updates);
+                System.out.println("FPS: " + frames + " | UPS: " + updates);
 
                 frames = 0;
                 updates = 0;
@@ -106,26 +107,18 @@ public class Game extends JFrame implements Runnable {
         this.playingScene = new PlayingScene(this);
     }
 
-    private void initInputs() {
-        this.mouseListener = new TowerDefenseMouseListener();
-        this.keyboardListener = new KeyboardListener();
-
-        this.addMouseListener(this.mouseListener);
-        this.addMouseMotionListener(this.mouseListener);
-        this.addKeyListener(this.keyboardListener);
-
-        this.requestFocus();
-    }
-
-    private void start () {
+    private void start() {
         gameThread.start();
     }
 
-    private void updateGame() {}
+    private void updateGame() {
+    }
 
     public static void main(String[] args) {
-        Game game = new Game();
-        game.initInputs();
-        game.start();
+        SwingUtilities.invokeLater(() -> {
+            Game game = new Game();
+            game.gameScreen.initInputs();
+            game.start();
+        });
     }
 }
